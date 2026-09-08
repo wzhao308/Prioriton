@@ -1,6 +1,7 @@
-"""Thin wrapper around the Claude API (Anthropic Python SDK) for the AI
-Recommendation System. Isolated in its own module so `recommendation_service`
-stays testable/readable without an SDK import mixed into its logic.
+"""Thin wrapper around Anthropic's API (the `anthropic` Python SDK) for the
+AI Recommendation System. Isolated in its own module so
+`recommendation_service` stays testable/readable without an SDK import mixed
+into its logic.
 """
 import json
 import logging
@@ -61,7 +62,7 @@ def _client():
 
 
 def _extract_json_array(text: str) -> Any:
-    """Claude is instructed to return only a JSON array, but this strips any
+    """The model is instructed to return only a JSON array, but this strips any
     accidental markdown code fences before parsing, since that's the most
     common way a strict-JSON instruction still gets lightly wrapped."""
     stripped = text.strip()
@@ -74,7 +75,7 @@ def _extract_json_array(text: str) -> Any:
 
 
 def generate_recommendations(summary: dict) -> list[dict]:
-    """Sends the analytics summary to Claude and returns a validated list of
+    """Sends the analytics summary to the LLM and returns a validated list of
     recommendation item dicts. Retries once with a stricter reminder if the
     first reply doesn't parse as the expected JSON array."""
     client, model = _client()

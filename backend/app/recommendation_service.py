@@ -1,5 +1,5 @@
 """The AI Recommendation System: builds a compact weekly analytics summary,
-sends it to Claude (app.llm_client), and stores the result as a
+sends it to the LLM (app.llm_client), and stores the result as a
 Recommendation row. Only starts producing anything once at least
 `recommendation_period_days` (default 7) have passed since the first task was
 ever synced or the first study session was ever started - see `is_eligible`.

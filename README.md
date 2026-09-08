@@ -22,7 +22,7 @@ grounded in your own numbers - not generic study advice.
    an assignment vs. the grade you got, and weekly productivity trends.
 4. **AI Recommendation System** - once ~1 week of real activity has been
    tracked, Prioriton sends a compact summary of your courses (grades, study
-   hours, upcoming assignments) to Claude and gets back a short list of
+   hours, upcoming assignments) to an LLM and gets back a short list of
    grounded recommendations, e.g. *"You're spending 2.3 fewer hours/week on
    MATH 241 than your other courses average"* or *"CS 225 assignments have
    taken you ~4 hours on average - start this one now."*
@@ -42,7 +42,7 @@ assignments all correlate per class regardless of where the class came from.
   check.
 - **Frontend:** React + Vite + TypeScript + Tailwind, React Query, React
   Router, Recharts for the Analytics Dashboard.
-- **AI:** Anthropic's Claude API (`anthropic` Python SDK). Everything else in
+- **AI:** Anthropic's API (`anthropic` Python SDK). Everything else in
   the app works with no API key set; only Recommendations needs one.
 
 ## Setup
@@ -219,7 +219,7 @@ backend/app/
                                        merges cross-platform duplicates, archives non-current-semester courses
   analytics_service.py             Analytics Dashboard's aggregation queries
   recommendation_service.py         AI Recommendation System - builds the summary, calls the LLM, stores results
-  llm_client.py                      Claude API wrapper (Anthropic SDK)
+  llm_client.py                      LLM API wrapper (Anthropic SDK)
   reminders.py                        Reminder generation + lead-time settings
   scheduler.py                         Background sync job + daily recommendation check
   adapters/                             Canvas / Gradescope / PrairieLearn (same adapter pattern as ManaPeer)
