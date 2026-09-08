@@ -1,0 +1,20 @@
+# Deployment (docker-compose.yml loads this - see .env.production.example)
+/.env
+
+# Backend
+backend/.venv/
+backend/.env
+backend/prioriton.db
+backend/.browser_profiles/
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# OS
+.DS_Store
+Thumbs.db

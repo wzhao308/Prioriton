@@ -1,0 +1,32 @@
+{
+	email {$ACME_EMAIL}
+}
+
+# Shared by every site below - this Basic Auth wall is the entire access
+# control for this deploy (see ../DEPLOY.md and the plan this came from).
+# Applies to the noVNC viewer too: that view can see/interact with an
+# in-progress Gradescope/PrairieLearn SSO login, so it must never be
+# reachable without the same credential as everything else.
+(auth) {
+	basic_auth {
+		{$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+	}
+}
+
+app.{$DOMAIN} {
+	import auth
+	root * /srv/app
+	try_files {path} /index.html
+	file_server
+	encode gzip
+}
+
+api.{$DOMAIN} {
+	import auth
+	reverse_proxy backend:8000
+}
+
+vnc.{$DOMAIN} {
+	import auth
+	reverse_proxy backend:6080
+}

@@ -1,0 +1,28 @@
+# For the public demo (Dockerfile.demo) - see DEPLOY_DEMO.md.
+# `app` must be globally unique across all of Fly - change it before deploying.
+app = "prioriton-demo"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.demo"
+
+[env]
+  PRIORITON_DEMO_MODE = "true"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

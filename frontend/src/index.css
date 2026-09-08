@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* Matcha theme: a warm, muted sage-green scale used for every brand/
+   interactive accent (buttons, active nav, links, focus states), paired with
+   Tailwind's built-in warm "stone" neutrals for text/borders and a cream
+   page background - "white and matcha green," not a full green wash.
+   `--font-display` (Fraunces, a soft organic serif) carries every heading
+   and the wordmark; body copy stays in Inter for readability - that pairing,
+   plus the sidebar shell in App.tsx, is what gives the app its own identity
+   instead of reading as a generic Tailwind dashboard template. */
+@theme {
+  --color-matcha-50: #f4f7ed;
+  --color-matcha-100: #e6edd5;
+  --color-matcha-200: #cddcac;
+  --color-matcha-300: #aecb7d;
+  --color-matcha-400: #8fb75c;
+  --color-matcha-500: #729c46;
+  --color-matcha-600: #5a8036;
+  --color-matcha-700: #47652b;
+  --color-matcha-800: #3a5124;
+  --color-matcha-900: #31421f;
+
+  --font-display: "Fraunces", "Iowan Old Style", ui-serif, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: #f8faf3;
+  color: #23281f;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A soft dotted matcha-leaf texture on the page plane, behind every route -
+   barely-there, but it's what stops the cream background from reading as
+   flat, un-designed white space. */
+#root {
+  background-image: radial-gradient(circle at 1px 1px, #dfe6ce 1.5px, transparent 0);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+}
