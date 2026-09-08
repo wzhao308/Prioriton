@@ -28,14 +28,17 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-5"
 
     # For a shared public demo deployment only - see app/demo.py and
-    # DEPLOY_DEMO.md. Disables connecting real Canvas/Gradescope/PrairieLearn
-    # accounts and generating real AI recommendations (both would mean a
-    # stranger's real data or a real Anthropic API call landing on a public,
-    # shared instance), and periodically wipes + reseeds sample data so the
-    # demo stays interactive without one visitor's changes lingering for the
-    # next. Never turn this on for a real personal deployment.
+    # DEPLOY_DEMO.md. Simulates connecting Canvas/Gradescope/PrairieLearn
+    # (drops in sample synced courses/tasks instead of touching a real
+    # account - a stranger's real data has no business landing on a public,
+    # shared instance) and rate-limits real AI generation (a real, billable
+    # Anthropic call is still made - just not on every visitor's every
+    # click), and periodically wipes + reseeds sample data so the demo stays
+    # interactive without one visitor's changes lingering for the next.
+    # Never turn this on for a real personal deployment.
     demo_mode: bool = False
     demo_reset_interval_hours: int = 3
+    demo_recommendation_cooldown_minutes: int = 30
 
 
 @lru_cache

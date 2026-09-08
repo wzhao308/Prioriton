@@ -109,8 +109,8 @@ export default function App() {
       <div className="flex-1 min-w-0 flex flex-col">
         {isDemo && (
           <div className="bg-matcha-600 px-4 py-1.5 text-center text-xs font-medium text-white">
-            Public demo with sample data - Canvas/Gradescope/PrairieLearn syncing and live AI
-            recommendations are disabled here, and the data resets on a timer.
+            Public demo with sample data - connecting Canvas/Gradescope/PrairieLearn is simulated
+            here, AI recommendations are real but rate-limited, and the data resets on a timer.
           </div>
         )}
         <div className="flex items-center justify-between border-b border-stone-200/80 bg-white/70 backdrop-blur-sm px-4 py-2.5 md:px-8">

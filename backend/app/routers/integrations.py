@@ -11,6 +11,7 @@ from app.adapters.prairielearn import LOGIN_URL as PRAIRIELEARN_LOGIN_URL
 from app.adapters.prairielearn import is_logged_in as prairielearn_is_logged_in
 from app.config import get_settings
 from app.db import engine, get_session
+from app.demo import simulate_connect
 from app.models import Integration
 from app.schemas import ConnectCanvasRequest, IntegrationRead
 from app.sync_service import run_sync
@@ -24,17 +25,6 @@ router = APIRouter(prefix="/integrations", tags=["integrations"])
 BROWSER_LOGIN_TYPES = {"gradescope", "prairielearn"}
 
 
-def _reject_in_demo_mode() -> None:
-    """Connecting a real account on a shared public demo would mean a
-    stranger's real Canvas token or Gradescope/PrairieLearn session landing
-    on an instance anyone can reach - see app.config.Settings.demo_mode."""
-    if get_settings().demo_mode:
-        raise HTTPException(
-            status_code=403,
-            detail="This is a public demo with sample data - connecting a real account is disabled here.",
-        )
-
-
 @router.get("", response_model=list[IntegrationRead])
 def list_integrations(session: Session = Depends(get_session)):
     return session.exec(select(Integration)).all()
@@ -42,7 +32,10 @@ def list_integrations(session: Session = Depends(get_session)):
 
 @router.post("/canvas", response_model=IntegrationRead)
 def connect_canvas(body: ConnectCanvasRequest, session: Session = Depends(get_session)):
-    _reject_in_demo_mode()
+    if get_settings().demo_mode:
+        # Whatever was actually submitted is never read past this point -
+        # see app.demo.simulate_connect's docstring for why.
+        return simulate_connect("canvas", session)
     adapter = CanvasAdapter(base_url=body.base_url, token=body.token)
     try:
         adapter.test_connection()
@@ -121,13 +114,18 @@ def _start_browser_login(platform: str, login_url: str, success_check, session: 
 
 @router.post("/gradescope/start-login", response_model=IntegrationRead)
 def start_gradescope_login(session: Session = Depends(get_session)):
-    _reject_in_demo_mode()
+    if get_settings().demo_mode:
+        # The real flow needs a headed browser to complete SSO - the
+        # lightweight demo image has no Xvfb to open one into at all (see
+        # Dockerfile.demo), so this is simulated instead of attempted.
+        return simulate_connect("gradescope", session)
     return _start_browser_login("gradescope", GRADESCOPE_LOGIN_URL, gradescope_is_logged_in, session)
 
 
 @router.post("/prairielearn/start-login", response_model=IntegrationRead)
 def start_prairielearn_login(session: Session = Depends(get_session)):
-    _reject_in_demo_mode()
+    if get_settings().demo_mode:
+        return simulate_connect("prairielearn", session)
     return _start_browser_login("prairielearn", PRAIRIELEARN_LOGIN_URL, prairielearn_is_logged_in, session)
 
 

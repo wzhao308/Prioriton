@@ -1,9 +1,13 @@
 """Public-demo mode: seeds realistic-looking sample data and periodically
 resets it, so a shared, publicly-reachable deployment stays interactive and
-self-heals from visitors clicking around, without ever touching a real
-Canvas/Gradescope/PrairieLearn account or making a real Anthropic API call
-(both are disabled elsewhere while `PRIORITON_DEMO_MODE` is on - see
-app.routers.integrations and app.routers.recommendations).
+self-heals from visitors clicking around. "Connecting" Canvas/Gradescope/
+PrairieLearn is simulated (see `simulate_connect` below) rather than either
+fully working or fully blocked - a stranger's real account has no business
+landing on a public shared instance, but the connect flow itself, and what a
+successful sync looks like, is worth actually being able to see. Live AI
+recommendation generation is real (a real Anthropic call), just rate-limited
+- see the `demo_mode` checks in app.routers.integrations and
+app.routers.recommendations.
 
 `seed_demo_data()` is also used standalone by scripts/seed_demo_data.py for
 trying the app locally with sample data - that path is additive and never
@@ -210,3 +214,83 @@ def reset_demo(session: Session) -> None:
     wipe_all(session)
     seed_demo_data(session)
     _seed_demo_recommendation(session)
+
+
+# One small "just synced" fixture per platform - what simulate_connect() drops
+# in, so a demo visitor sees new, platform-labeled content actually appear
+# right after "connecting", the same way a real first sync feels.
+_SIMULATED_SYNC_FIXTURES = {
+    "canvas": {
+        "course_name": "PHYS 214 - Quantum Physics",
+        "code": "PHYS 214",
+        "tasks": ["Problem Set 3", "Midterm Review Questions", "Lab Report 2"],
+    },
+    "gradescope": {
+        "course_name": "CS 341 - System Programming",
+        "code": "CS 341",
+        "tasks": ["MP3: Shell", "MP4: Malloc", "Written HW2"],
+    },
+    "prairielearn": {
+        "course_name": "STAT 400 - Statistics",
+        "code": "STAT 400",
+        "tasks": ["HW5", "Quiz 4", "Practice Exam"],
+    },
+}
+
+
+def simulate_connect(platform: str, session: Session) -> Integration:
+    """Demo mode's stand-in for a real Canvas/Gradescope/PrairieLearn
+    connection. Never touches whatever the visitor actually submitted (a
+    Canvas form's token, say) - it isn't validated, used, or stored, full
+    stop. Gradescope/PrairieLearn's real flow needs a headed browser to
+    complete SSO, which the lightweight demo image never has (see
+    Dockerfile.demo vs. the real backend/Dockerfile's Xvfb/noVNC chain), so
+    this is also the only way those two can be shown here at all.
+
+    Marks the integration connected and drops in one small fixture course +
+    a few tasks tagged with that platform's `source`, so the connect flow
+    has something real to point at - Courses/Calendar/Analytics all pick it
+    up exactly like a real sync's results, because it's the same Course/Task
+    rows a real one would produce. Idempotent per platform - connecting
+    twice doesn't duplicate the fixture data, just refreshes last_synced_at.
+    """
+    integration = session.exec(select(Integration).where(Integration.type == platform)).first()
+    if integration is None:
+        integration = Integration(type=platform, encrypted_credentials="demo-simulated")
+    integration.status = "connected"
+    integration.last_error = None
+    integration.last_synced_at = _now()
+    session.add(integration)
+
+    fixture = _SIMULATED_SYNC_FIXTURES[platform]
+    external_id = f"demo-{platform}"
+    course = session.exec(
+        select(Course).where(Course.source == platform, Course.external_id == external_id)
+    ).first()
+    if course is None:
+        course = Course(
+            source=platform,
+            external_id=external_id,
+            name=fixture["course_name"],
+            term="Fall 2026",
+            code=fixture["code"],
+        )
+        session.add(course)
+        session.flush()
+        now = _now()
+        for i, title in enumerate(fixture["tasks"]):
+            session.add(
+                Task(
+                    source=platform,
+                    external_id=f"{external_id}-t{i}",
+                    course_id=course.id,
+                    title=title,
+                    type="assignment",
+                    due_at=now + timedelta(days=3 + i * 4),
+                    status="pending",
+                )
+            )
+
+    session.commit()
+    session.refresh(integration)
+    return integration

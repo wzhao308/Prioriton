@@ -77,22 +77,20 @@ export default function Recommendations() {
 
       {data.eligible && (
         <>
-          {isDemo ? (
+          <button
+            onClick={() => generate.mutate()}
+            disabled={generate.isPending}
+            className="rounded-xl bg-matcha-600 px-4 py-2 text-sm font-medium text-white hover:bg-matcha-700 disabled:opacity-50"
+          >
+            {generate.isPending ? "Generating…" : data.id ? "Regenerate" : "Generate now"}
+          </button>
+          {isDemo && (
             <p className="text-xs text-stone-400">
-              Pre-generated example - live generation is disabled on this public demo (see Settings).
+              Public demo - live generation here is a real AI call, rate-limited so one shared
+              instance can't be spammed.
             </p>
-          ) : (
-            <>
-              <button
-                onClick={() => generate.mutate()}
-                disabled={generate.isPending}
-                className="rounded-xl bg-matcha-600 px-4 py-2 text-sm font-medium text-white hover:bg-matcha-700 disabled:opacity-50"
-              >
-                {generate.isPending ? "Generating…" : data.id ? "Regenerate" : "Generate now"}
-              </button>
-              {generate.isError && <p className="text-sm text-red-600">{(generate.error as Error).message}</p>}
-            </>
           )}
+          {generate.isError && <p className="text-sm text-red-600">{(generate.error as Error).message}</p>}
 
           {data.generated_at && (
             <p className="text-xs text-stone-400">
