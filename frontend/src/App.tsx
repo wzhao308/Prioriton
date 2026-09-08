@@ -68,10 +68,7 @@ export default function App() {
           <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-matcha-600 text-white">
             <LeafIcon />
           </span>
-          <span className="flex flex-col leading-tight">
-            <span className="font-display text-lg font-semibold text-stone-900">Prioriton</span>
-            <span className="text-[11px] text-stone-400">know what to work on next</span>
-          </span>
+          <span className="font-display text-lg font-semibold text-stone-900">Prioriton</span>
         </Link>
 
         <nav className="flex flex-col gap-1">
